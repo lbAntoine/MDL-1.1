@@ -1,4 +1,3 @@
-# gcgmaster.py - BOT Discord server origin : GCG
 # Coded and updated by : Antoine Le Bras
 
 print(f'Starting bot...')
@@ -31,11 +30,10 @@ BLABLA_CHANNEL = int(os.getenv('BLABLA_CHANNEL'))
 
 bot = commands.Bot(command_prefix='master_')
 status = cycle(['master_info', 
-'Banlist ?', 
-'GO GCG GO !!', 
-'Thinking...', 
-'Je me sens un peu seul',
-'PEND BEST DECK!',])
+    'Banlist ?', 
+    'GO GCG GO !!', 
+    'Thinking...',
+])
 goat = '<:Goat:589352160207306753>'
 
 
@@ -53,17 +51,17 @@ async def on_ready():
     )
 
 
-#Change le game status du bot toutes les 10 secs (les statuts sont contenus dans le cycle)
+#Change the game status of the bot every 10 secs
 @tasks.loop(seconds=10)
 async def change_status():
     await bot.change_presence(activity=discord.Game(next(status)))
 
 
-#Envoi le joueur N1 de la GCG et son ranking DB toutes les 24h
-@bot.command(name='classement')
+#Send a ranking of the best players (based on a google sheet)
+@bot.command(name='ranking')
 async def best_player(ctx):
-    print(f'debut classement')
-    gcg_best = googleConnect(GCG_SHEET_KEY, 'CLASSEMENT GCG')
+    print(f'start ranking')
+    gcg_best = googleConnect(GCG_SHEET_KEY, 'RANKING GCG')
     gcg_best.googleLogin()
     super_cleaner = outils()
 
@@ -73,10 +71,10 @@ async def best_player(ctx):
     db_ranking = super_cleaner.clean(gcg_best.worksheet.get('C2')) #get the C2 cell of 'CLASSEMENT GCG'!
     print(f'{db_ranking}')
 
-    best_playerEmbed = discord.Embed(title=f'{goat} Le meilleur joueur GCG {goat}', description='Se relance toutes les 24h!', color=0x399494)
+    best_playerEmbed = discord.Embed(title=f'{goat} GCG\'s best player {goat}', description='Se relance toutes les 24h!', color=0x399494)
     best_playerEmbed.add_field(
         name=f'{player_name}{goat}',
-        value=f'C\'est le meilleur joueur de la GCG aujourd\'hui avec {db_ranking} pts de ranking DB!'
+        value=f'It\'s the best player of this week with {db_ranking} pts!'
     )
     channel = bot.get_channel(PATCH_NOTES) #def channel here with channel's ID
     await channel.send(embed=best_playerEmbed) #'NoneType' object has no attribute 'send'
@@ -84,85 +82,75 @@ async def best_player(ctx):
     'best_player success')
 
 
-#Ping du bot
+#Ping
 @bot.command(name='ping')
 async def _ping(ctx):
     await ctx.message.delete()
-    pingEmbed = discord.Embed(title=f'Ping de GCG_master {goat}', description=f'{round(bot.latency, 2)}')
+    pingEmbed = discord.Embed(title=f'Ping of GCG_master {goat}', description=f'{round(bot.latency, 2)}')
     await ctx.send(embed=pingEmbed)
     print('Ping success')
 
 
-#Display les commandes du bot
-@bot.command(name='info', help='Montre comment utiliser les différentes commandes avec des exemples')
+#Display informations about bot's functions
+@bot.command(name='info', help='Show help and function examples')
 async def info(ctx):
     await ctx.message.delete()
-    tutoEmbed = discord.Embed(title=f'{goat} Tutoriel des commandes GCG_master {goat}', description='Préfixe de commande \"master_\"', color=0x399494)
+    tutoEmbed = discord.Embed(title=f'{goat} Bot\'s help page {goat}', description='Command prefix \"master_\"', color=0x399494)
     tutoEmbed.add_field(
-        name='\N{SMALL ORANGE DIAMOND} Commande ping',
-        value='Permet de vérifier si le bot est bien en ligne et son ping',
+        name='\N{SMALL ORANGE DIAMOND} Ping',
+        value='Let you check if the bot is correctly connected and ready to interact',
         inline=False
     )
     tutoEmbed.add_field(
-        name='\N{SMALL ORANGE DIAMOND} Commande roll_dice', 
-        value='Après avoir écrit la commande avec le préfixe (\"master_roll_dice\"), il faut indiquer le nombre de jets (avec un chiffre) puis le nombre de faces du dé. Chaque valeur doit être séparée par un espace.\n'
-        'EXEMPLE : master_roll_dice 1 6\n'
-        'Le bot renverra donc le résultat d\'un jet de dé à 6 faces.',
+        name='\N{SMALL ORANGE DIAMOND} Command roll_dice', 
+        value='After writing the command with the correct prefix (\"master_roll_dice\"), you need to add the number of dice throw (with a number) then add the number of faces of the dice. Each value must be separated by a space.\n'
+        'EXAMPLE : master_roll_dice 1 6\n'
+        'The bot should send the result of one dice with six faces.',
         inline=False
     )
     tutoEmbed.add_field(
-        name='\N{SMALL ORANGE DIAMOND} Commandes test_prob et test_prob_dm',
-        value='Après avoir écrit la commande avec le préfixe (\"master_test_prob\" ou \"master_test_prob_dm\"), il faut indiquer les valeurs de trois éléments dans l\'ordre suivant :\n'
-        '\N{SMALL BLUE DIAMOND} Nombre de cartes dans le deck\n'
-        '\N{SMALL BLUE DIAMOND} Nombre de cartes piochées\n'
-        '\N{SMALL BLUE DIAMOND} Nombre de cartes cibles dans le deck\n'
-        'Le bot renverra un récapitulatif des données envoyées et le résultats impliquant ces données.\n'
-        'EXEMPLE : master_test_stat 40 5 3\n'
-        'J\'ai 40 cartes dans le deck, je vais piocher 5 cartes et j\'ai trois cartes cibles dans mon deck (3 TGU par exemple). Le bot me donnera le pourcentage de réussites de toucher une de ces 3 cartes, puis deux, puis trois.\n'
-        'La fonction \"master_test_prob_dm\" effectue la même chose, mais le résultat vous sera envoyé dans vos DM plutôt que dans le chat du serveur.\n'
-        'Le calcul est fait selon la formule de distribution hypergéométrique (source : https://stattrek.com/online-calculator/hypergeometric.aspx)',
+        name='\N{SMALL ORANGE DIAMOND} Commands test_prob and test_prob_dm',
+        value='After writing the command with the correct prefix (\"master_test_prob\" or \"master_test_prob_dm\"), you need to add three numbers in the following order:\n'
+        '\N{SMALL BLUE DIAMOND} Number of cards in the deck\n'
+        '\N{SMALL BLUE DIAMOND} Number of cards drawn\n'
+        '\N{SMALL BLUE DIAMOND} Number of targets in the deck\n'
+        'The bot will send a recap of the data that were sent to him and the result from this data.\n'
+        'EX1MPLE : master_test_stat 40 5 3\n'
+        'I have a 40 cards deck, I\'m going to draw 5 cards and I have 3 target cards in my deck. The bot will send me the probability of drawing one, two and all the copies of the target card.\n'
+        'The command \"master_test_prob_dm\" does the same thing but send the result in DMs.\n'
+        '(source : https://stattrek.com/online-calculator/hypergeometric.aspx)',
         inline=False
     )
-    tutoEmbed.add_field(
-        name='\N{SMALL ORANGE DIAMOND} Suggestions',
-        value='N\'hésitez pas à me DM en cas de soucis ou si vous avez des idées de nouvelles fonctions que je pourrais implémenter au bot !\n'
-        'Le bot est codé en python et fonctionne grâce aux API discord de la librairie discord.py\n'
-        'J\'espère que vous l\'utiliserez beaucoup et qu\'il vous plait ! :)\n'
-        f'{PATCH_NOTES}',
-        inline=False
-    )
-    tutoEmbed.set_footer(text=f'Bot programmé par (GCG)Antoine {goat}')
+    tutoEmbed.set_footer(text=f'Bot coded by Antoine {goat}')
     await ctx.send(embed=tutoEmbed)
     print('Info success')
 
 
 #Commande qui simule un dice roll
-@bot.command(name='roll_dice', help='Simule un lancé de dés')
+@bot.command(name='roll_dice', help='Simulate a dice throw')
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
     await ctx.message.delete()
-    myEmbed = discord.Embed(title=f'Lancé de dés', color=0x1f1109)
+    myEmbed = discord.Embed(title=f'Dice throw', color=0x1f1109)
     dice = [
         str(random.choice(range(1, number_of_sides + 1)))
         for _ in range(number_of_dice)
     ]
-    myEmbed.add_field(name='Jets : ', value=', '.join(dice), inline=False)
+    myEmbed.add_field(name='Throws : ', value=', '.join(dice), inline=False)
     await ctx.send(embed=myEmbed)
     print('Roll success')
 
 
 #Prob test
-@bot.command(name='test_prob', help='Lance un test de probabilité')
+@bot.command(name='test_prob', help='Probability test')
 async def test_prob(ctx, deck_size: int, numb_draw: int, numb_copy: int):
     await ctx.message.delete()
-    myEmbed = discord.Embed(title=f'Test de probabilité', description='Voici le résultat !', color=0x1eb473)
-    #min_success input - not needed cause we admit that min_success is always = 1
-    #formule (discret): pval = hypergeom.sf(x-1, M, n, N)
+    myEmbed = discord.Embed(title=f'Probability test', description='Here is the result!', color=0x1eb473)
     myEmbed.add_field(
-        name='\N{SMALL ORANGE DIAMOND} Récapitulatif :', 
-        value=f'Taille du deck : {deck_size}\n'
-        f'Nombres de cartes piochées : {numb_draw}\n'
-        f'Nombres de copies de la cible : {numb_copy}', 
-        inline=False
+            name='\N{SMALL ORANGE DIAMOND} Recap :', 
+            value=f'Deck size: {deck_size}\n'
+            f'Number of card drawn: {numb_draw}\n'
+            f'Number of target(s): {numb_copy}', 
+            inline=False
         )
 
     x = min_success = 1
@@ -173,12 +161,9 @@ async def test_prob(ctx, deck_size: int, numb_draw: int, numb_copy: int):
     for min_success in range(numb_draw):
         pval = hypergeom.sf(x-1, M, n, N)
 
-        #print(f'Pour {min_success+1} copie(s) en main de départ : {round(pval*100, 2)}%')
-        #pas obliger de le print pour éco le serveur
-
         myEmbed.add_field(
-            name='\N{SMALL ORANGE DIAMOND} Chance de réussite', 
-            value=f'- Pour {min_success+1} copie(s) en main de départ : {round(pval*100, 2)}%'
+                name='\N{SMALL ORANGE DIAMOND} Success rates', 
+                value=f'- For {min_success+1} copy(ies) in starting hand: {round(pval*100, 2)}%'
             )
 
         x = x+1
@@ -188,8 +173,6 @@ async def test_prob(ctx, deck_size: int, numb_draw: int, numb_copy: int):
         if numb_copy == 0: break
         if numb_draw == 0: break
         if deck_size == 0: break
-        #if min_success == numb_copy: break
-        #if min_success == 0: break
 
         myEmbed.set_footer(text=f'Provided by GCG_master {goat}')
     
@@ -198,18 +181,16 @@ async def test_prob(ctx, deck_size: int, numb_draw: int, numb_copy: int):
 
 
 #Prob test version DM
-@bot.command(name='test_prob_dm', help='Lance un test de probabilité et l\'envoie dans vos DM')
+@bot.command(name='test_prob_dm', help='Probability test, sends it in DMs')
 async def test_prob_dm(ctx, deck_size: int, numb_draw: int, numb_copy: int):
     await ctx.message.delete()
-    myEmbed = discord.Embed(title=f'Test de probabilité', description='Voici le résultat !', color=0x1eb473)
-    #min_success input - not needed cause we admit that min_success is always = 1
-    #formule (discret): pval = hypergeom.sf(x-1, M, n, N)
+    myEmbed = discord.Embed(title=f'Probability test', description='Here is the result!', color=0x1eb473)
     myEmbed.add_field(
-        name='\N{SMALL ORANGE DIAMOND} Récapitulatif :', 
-        value=f'Taille du deck : {deck_size}\n'
-        f'Nombres de cartes piochées : {numb_draw}\n'
-        f'Nombres de copies de la cible : {numb_copy}', 
-        inline=False
+            name='\N{SMALL ORANGE DIAMOND} Recap :', 
+            value=f'Deck size: {deck_size}\n'
+            f'Number of card drawn: {numb_draw}\n'
+            f'Number of target(s): {numb_copy}', 
+            inline=False
         )
 
     x = min_success = 1
@@ -220,12 +201,9 @@ async def test_prob_dm(ctx, deck_size: int, numb_draw: int, numb_copy: int):
     for min_success in range(numb_draw):
         pval = hypergeom.sf(x-1, M, n, N)
 
-        #print(f'Pour {min_success+1} copie(s) en main de départ : {round(pval*100, 2)}%')
-        #pas obliger de le print pour éco le serveur super
-
         myEmbed.add_field(
-            name='\N{SMALL ORANGE DIAMOND} Chance de réussite', 
-            value=f'- Pour {min_success+1} copie(s) en main de départ : {round(pval*100, 2)}%'
+                name='\N{SMALL ORANGE DIAMOND} Success rates', 
+                value=f'- For {min_success+1} copy(ies) in starting hand: {round(pval*100, 2)}%'
             )
 
         x = x+1
@@ -235,8 +213,6 @@ async def test_prob_dm(ctx, deck_size: int, numb_draw: int, numb_copy: int):
         if numb_copy == 0: break
         if numb_draw == 0: break
         if deck_size == 0: break
-        #if min_success == numb_copy: break
-        #if min_success == 0: break
 
         myEmbed.set_footer(text=f'Provided by GCG_master {goat}')
     
