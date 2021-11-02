@@ -7,7 +7,7 @@ The original code contained descriptions in french that I took the time to trans
 ### **Connect with me**:
 
 [<img align="left" alt="lbAntoine | Twitter" width="28px" src="https://image.flaticon.com/icons/png/512/60/60580.png" />][twitter]
-[<img align="left" alt="lbAntoine | LinkedIn" width="28px" src="https://cdn-icons.flaticon.com/png/512/3536/premium/3536505.png?token=exp=1635191790~hmac=378905ed497a251d9346901d8b4517cd" />][linkedin]
+[<img align="left" alt="lbAntoine | LinkedIn" width="28px" src="https://cdn-icons-png.flaticon.com/512/61/61109.png" />][linkedin]
 <a href="https://dev.to/tomatowizard" target="_blank"><img alt="dev.to" src="https://img.shields.io/badge/MY%20DEV.TO%20PAGE-GO-green?style=for-the-badge&logo=dev.to" /></a>
 
 
